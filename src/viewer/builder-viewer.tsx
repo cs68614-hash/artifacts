@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Builder } from "../builder/builder";
 import { BuilderPreset } from "../presets/types";
-import { BuilderCache } from "../builder/builder-cache";
+import { IndexedDbCache } from "../builder/indexed-db-cache";
+
+
 
 export interface BuilderViewerProps {
   files: Record<string, string>;
@@ -10,7 +12,10 @@ export interface BuilderViewerProps {
 }
 
 export default function BuilderViewer(props: BuilderViewerProps) {
-  const [cache] = useState(() => new BuilderCache());
+  const [cache] = useState(() => {
+    const newCache = new IndexedDbCache();
+    return newCache;
+  });
   const [errors, setErrors] = useState<string[]>([]);
   const [progress, setProgress] = useState<number>(0);
   const [html, setHtml] = useState<string>();

@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@centralmind/artifacts": "^0.1.4",
+    "@centralmind/artifacts": "workspace:*",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",

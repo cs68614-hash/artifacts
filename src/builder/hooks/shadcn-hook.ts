@@ -69,7 +69,7 @@ export class ShadcnHook extends BuilderHookBase {
       path = BuilderUtils.stripStart(registryPrefix, path);
       const componentsBase = `shadcn-ui/ui@${this._version}/apps/www/registry/${theme}/ui`;
       const url = `${BuilderConstants.CDN_BASE_GH}/${componentsBase}/${path}.tsx`;
-      let data = context.cache.get(url);
+      let data = await context.cache.get(url);
 
       if (!data) {
         const response = await fetch(url);
@@ -80,7 +80,7 @@ export class ShadcnHook extends BuilderHookBase {
 
         const arrayBuffer = await response.arrayBuffer();
         data = new Uint8Array(arrayBuffer);
-        context.cache.set(url, data);
+        await context.cache.set(url, data);
       }
 
       return { contents: data, loader: "tsx" };
@@ -89,7 +89,7 @@ export class ShadcnHook extends BuilderHookBase {
       const componentsBase = `shadcn-ui/ui@${this._version}/apps/www/lib`;
       const url = `${BuilderConstants.CDN_BASE_GH}/${componentsBase}/${path}.ts`;
 
-      let data = context.cache.get(url);
+      let data = await context.cache.get(url);
 
       if (!data) {
         const response = await fetch(url);
@@ -100,7 +100,7 @@ export class ShadcnHook extends BuilderHookBase {
 
         const arrayBuffer = await response.arrayBuffer();
         data = new Uint8Array(arrayBuffer);
-        context.cache.set(url, data);
+        await context.cache.set(url, data);
       }
 
       return { contents: data, loader: "ts" };

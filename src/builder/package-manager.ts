@@ -39,6 +39,8 @@ export class PackageManager {
   protected _dependencies: Record<string, string> = {};
   protected _packages: Record<string, PackageMetadata> = {};
   protected _paths = new Set<string>();
+  
+
 
   get paths() {
     return this._paths;
@@ -111,18 +113,20 @@ export class PackageManager {
     relativePath: string = ""
   ): Promise<PackageManifest> {
     const basePath = `${BuilderConstants.CDN_BASE_NPM}/${packageName}@${version}`;
-    const response = await fetch(`${basePath}${relativePath}/package.json`);
+    const manifestUrl = `${basePath}${relativePath}/package.json`;
+
+    const response = await fetch(manifestUrl);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch package "${packageName}@${version}"`);
+      throw new Error(`Failed to fetch package manifest for "${packageName}@${version}" from ${manifestUrl}`);
     }
 
     const manifest = await response.json();
     this._dependencies[packageName] = manifest.version;
 
     if (manifest.dependencies) {
-      for (const [name, version] of Object.entries(manifest.dependencies as Record<string, string>)) {
-        this._dependencies[name] = version;
+      for (const [name, depVersion] of Object.entries(manifest.dependencies as Record<string, string>)) {
+        this._dependencies[name] = depVersion;
       }
     }
 
@@ -169,19 +173,20 @@ export class PackageManager {
       throw new Error(`Package "${packageName}" not found`);
     }
 
-    const url = `${BuilderConstants.CDN_BASE_NPM}/${packageName}@${current.version}${packagePath}`;
-    let data = context.cache.get(url);
+    const rewrittenPath = this.rewrite(packageName, packagePath);
+    const url = `${BuilderConstants.CDN_BASE_NPM}/${packageName}@${current.version}${rewrittenPath}`;
+    let data = await context.cache.get(url);
 
     if (!data) {
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch file "${packageName}@${current.version}${packagePath}"`);
+        throw new Error(`Failed to fetch file "${packageName}@${current.version}${rewrittenPath}"`);
       }
 
       const arrayBuffer = await response.arrayBuffer();
       data = new Uint8Array(arrayBuffer);
-      context.cache.set(url, data);
+      await context.cache.set(url, data);
     }
 
     return data;
@@ -197,7 +202,10 @@ export class PackageManager {
     if (!packagePath) {
       const manifest = current.manifest;
       const main = manifest.module ?? manifest.main ?? manifest["umd:main"];
-      packagePath += `/${main}`;
+      if (!main) {
+        throw new Error(`Main file not found in package: ${packageName}`);
+      }
+      packagePath = `/${main}`;
     } else {
       for (const subPackage of current.subPackages) {
         if (packagePath == subPackage.path) {
@@ -212,11 +220,13 @@ export class PackageManager {
             throw new Error(`Main file not found in package: ${packageName}/${subPackage.path}`);
           }
 
-          packagePath += `/${main}`;
+          packagePath = `${packagePath}/${main}`;
         }
       }
     }
 
     return packagePath;
   }
+
+
 }

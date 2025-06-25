@@ -1,11 +1,11 @@
 import * as esbuild from "esbuild-wasm";
 import { BuilderUtils } from "./builder-utils";
 import { BuilderConstants } from "./builder-constants";
-import { BuilderCache } from "./builder-cache";
+import { IndexedDbCache } from "./indexed-db-cache";
 import { BuilderPreset, Files } from "../presets/types";
 
 export interface CreateSessionOptions {
-  cache: BuilderCache;
+  cache: IndexedDbCache;
   preset: BuilderPreset;
   options?: Record<string, string | number | boolean>;
   files: Files;
@@ -13,7 +13,7 @@ export interface CreateSessionOptions {
 }
 
 export interface BuilderContext {
-  cache: BuilderCache;
+  cache: IndexedDbCache;
   preset: BuilderPreset;
   includes: string[];
   state: Record<string, string | number | boolean>;

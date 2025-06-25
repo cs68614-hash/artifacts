@@ -31,6 +31,8 @@
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:prod": "npm test && npm run prettier && npm run lint && npm run build",
+    "dev:sample": "pnpm --filter basic dev",
+    "build:sample": "pnpm --filter basic build",
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,samples/basic/src}/**/*.{js,ts,jsx,tsx}\"",
     "test": "jest --config jestconfig.json",
